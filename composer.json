@@ -1,0 +1,6 @@
+{
+    "name": "bravesheep/ideal",
+    "require": {
+        "ass/xmlsecurity": "dev-master"
+    }
+}
