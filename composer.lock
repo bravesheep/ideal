@@ -1,0 +1,73 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "55a5f3bb5a0a5ee8853f3affd20f6750",
+    "packages": [
+        {
+            "name": "ass/xmlsecurity",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aschamberger/XmlSecurity.git",
+                "reference": "5bcf66d7ed849098065860db48162c133ac17c53"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aschamberger/XmlSecurity/zipball/5bcf66d7ed849098065860db48162c133ac17c53",
+                "reference": "5bcf66d7ed849098065860db48162c133ac17c53",
+                "shasum": ""
+            },
+            "require": {
+                "lib-openssl": ">=0.9.0",
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "ass\\XmlSecurity": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Robert Richards",
+                    "email": "rrichards@cdatazone.org"
+                },
+                {
+                    "name": "Andreas Schamberger",
+                    "email": "mail@andreass.net"
+                }
+            ],
+            "description": "The XmlSecurity library is written in PHP for working with XML Encryption and Signatures",
+            "homepage": "https://github.com/aschamberger/XmlSecurity",
+            "keywords": [
+                "encryption",
+                "security",
+                "signature",
+                "xml"
+            ],
+            "time": "2013-07-09 20:04:33"
+        }
+    ],
+    "packages-dev": [
+
+    ],
+    "aliases": [
+
+    ],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "ass/xmlsecurity": 20
+    },
+    "platform": [
+
+    ],
+    "platform-dev": [
+
+    ]
+}

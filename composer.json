@@ -1,6 +1,12 @@
 {
     "name": "bravesheep/ideal",
+    "minimum-stability": "dev",
     "require": {
         "ass/xmlsecurity": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "Bs\\Ideal": "lib/"
+        }
     }
 }
