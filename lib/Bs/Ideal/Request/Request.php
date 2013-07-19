@@ -18,9 +18,12 @@ class Request
 
     private $merchant;
 
+    private $signed;
+
     public function __construct(Ideal $ideal, $rootName)
     {
         $this->ideal = $ideal;
+        $this->signed = false;
         $this->createDocument($rootName);
     }
 
@@ -57,33 +60,17 @@ class Request
     {
         $key = $this->getIdeal()->getKey();
         $signature = DSig::createSignature($key, DSig::EXC_C14N, $this->root);
-        // $node = $this->doc->createElement('test');
-        // $transformationAlgorithm = 'http://www.w3.org/2000/09/xmldsig#enveloped-signature';
-        // DSig::addNodeToSignature($signature, $node, $digestAlgorithm, DSig::XPATH, array(
-        //     'xpath_transformation' => array(
-        //         'query' => 'count(ancestor-or-self::dsig:Signature | here()/ancestor::dsig:Signature[1]) > count(ancestor-or-self::dsig:Signature)',
-        //         'namespaces' => array(
-        //             'dsig' => $transformationAlgorithm
-        //         )
-        //     )
-        // ));
-        DSig::addNodeToSignature($signature, $this->root, DSig::SHA256, DSig::TRANSFORMATION_ENVELOPED_SIGNATURE);
+        DSig::addNodeToSignature($signature, $this->root, DSig::SHA256, DSig::TRANSFORMATION_ENVELOPED_SIGNATURE, array(
+            'overwrite_id' => false,
+        ));
         DSig::signDocument($signature, $key, DSig::EXC_C14N);
+        $this->root->removeAttribute('Id');
+        $this->signed = true;
     }
 
-    public function send()
+    public function isSigned()
     {
-        $curl = curl_init($this->getIdeal()->getBaseUrl());
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $this->doc->saveXML());
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-            'Content-Type' => 'text/xml; charset=UTF-8'
-        ));
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-
-        $result = curl_exec($curl);
-
-        print $result;
+        return $this->signed;
     }
 
     public function getDocument()
