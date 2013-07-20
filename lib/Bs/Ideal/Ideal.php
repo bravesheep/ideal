@@ -13,6 +13,8 @@ class Ideal
 
     private $merchantId;
 
+    private $subId;
+
     private $key;
 
     private $baseUrl;
@@ -22,15 +24,21 @@ class Ideal
         $this->baseUrl = $baseUrl;
     }
 
-    public function setMerchant($merchantId, Key $key)
+    public function setMerchant($merchantId, Key $key, $subId = 0)
     {
         $this->merchantId = $merchantId;
+        $this->subId = $subId;
         $this->key = $key;
     }
 
     public function getMerchantId()
     {
         return $this->merchantId;
+    }
+
+    public function getSubId()
+    {
+        return $this->subId;
     }
 
     public function getKey()
@@ -61,7 +69,7 @@ class Ideal
 
         $curl = curl_init($this->getBaseUrl());
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $request->getDocument()->saveXML());
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $request->getDocumentString());
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
             'Content-Type' => 'text/xml; charset=UTF-8'
         ));

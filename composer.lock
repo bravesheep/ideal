@@ -3,31 +3,35 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "55a5f3bb5a0a5ee8853f3affd20f6750",
+    "hash": "9a9d50203d600d3b3a8d5914874696ef",
     "packages": [
         {
-            "name": "ass/xmlsecurity",
-            "version": "dev-master",
+            "name": "rnijveld/xmlseclibs",
+            "version": "v1.3.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/aschamberger/XmlSecurity.git",
-                "reference": "5bcf66d7ed849098065860db48162c133ac17c53"
+                "url": "https://github.com/rnijveld/xmlseclibs.git",
+                "reference": "v1.3.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aschamberger/XmlSecurity/zipball/5bcf66d7ed849098065860db48162c133ac17c53",
-                "reference": "5bcf66d7ed849098065860db48162c133ac17c53",
+                "url": "https://api.github.com/repos/rnijveld/xmlseclibs/zipball/v1.3.1",
+                "reference": "v1.3.1",
                 "shasum": ""
             },
-            "require": {
-                "lib-openssl": ">=0.9.0",
-                "php": ">=5.3.0"
+            "replace": {
+                "cdatazone/xmlseclibs": "self.version",
+                "fr3d/xmlseclibs": "self.version"
+            },
+            "suggest": {
+                "ext/mcrypt": "",
+                "ext/openssl": ""
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "ass\\XmlSecurity": "src/"
-                }
+                "files": [
+                    "xmlseclibs.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -35,23 +39,21 @@
             ],
             "authors": [
                 {
-                    "name": "Robert Richards",
-                    "email": "rrichards@cdatazone.org"
-                },
-                {
-                    "name": "Andreas Schamberger",
-                    "email": "mail@andreass.net"
+                    "name": "Rob Richards"
                 }
             ],
-            "description": "The XmlSecurity library is written in PHP for working with XML Encryption and Signatures",
-            "homepage": "https://github.com/aschamberger/XmlSecurity",
+            "description": "A PHP library for XML Security",
+            "homepage": "http://code.google.com/p/xmlseclibs/",
             "keywords": [
-                "encryption",
+                "certificate",
                 "security",
                 "signature",
-                "xml"
+                "signing",
+                "x.509",
+                "xml",
+                "xmlsec"
             ],
-            "time": "2013-07-09 20:04:33"
+            "time": "2013-06-19 00:00:00"
         }
     ],
     "packages-dev": [
@@ -61,9 +63,9 @@
 
     ],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "ass/xmlsecurity": 20
-    },
+    "stability-flags": [
+
+    ],
     "platform": [
 
     ],

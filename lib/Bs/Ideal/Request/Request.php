@@ -54,6 +54,9 @@ class Request
 
         $merchantId = $this->doc->createElement('merchantID', $this->getIdeal()->getMerchantId());
         $this->merchant->appendChild($merchantId);
+
+        $subId = $this->doc->createElement('subID', $this->getIdeal()->getSubId());
+        $this->merchant->appendChild($subId);
     }
 
     public function sign()
@@ -76,5 +79,11 @@ class Request
     public function getDocument()
     {
         return $this->doc;
+    }
+
+    public function getDocumentString()
+    {
+        $str = $this->getDocument()->saveXML();
+        return str_replace(array('<ds:', '</ds:', ' xmlns:ds="'), array('<', '</', ' xmlns="'), $str);
     }
 }
