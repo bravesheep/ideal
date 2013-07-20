@@ -2,9 +2,9 @@
 
 namespace Bs\IDeal\Request;
 
+use ass\XmlSecurity\DSig;
 use Bs\IDeal\IDeal;
 use DOMImplementation;
-use XMLSecurityDSig;
 
 class Request
 {
@@ -64,21 +64,11 @@ class Request
         $key = $this->ideal->getMerchantKey();
 
         // sign
-        $dsig = new XMLSecurityDSig();
-        $dsig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
-        $dsig->addReference($this->doc, XMLSecurityDSig::SHA256, [
-            'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
-        ], [
-            'force_uri' => true,
-        ]);
-        $dsig->sign($key);
-        $signature = $dsig->appendSignature($this->root);
-
-        // add key fingerprint
-        $keyInfo = $this->doc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'KeyInfo');
-        $keyName = $this->doc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'KeyName', $this->ideal->getMerchantKeyFingerprint());
-        $keyInfo->appendChild($keyName);
-        $signature->appendChild($keyInfo);
+        $signature = DSig::createSignature($key, DSig::EXC_C14N, $this->doc);
+        DSig::addNodeToSignature($signature, $this->doc, DSig::SHA256, DSig::TRANSFORMATION_ENVELOPED_SIGNATURE, array(
+            'overwrite_id' => false,
+        ));
+        DSig::signDocument($signature, $key, DSig::EXC_C14N);
 
         $this->signed = true;
     }

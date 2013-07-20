@@ -2,7 +2,7 @@
     "name": "bravesheep/ideal",
     "minimum-stability": "dev",
     "require": {
-        "rnijveld/xmlseclibs": "v1.3.1"
+        "ass/xmlsecurity": "dev-master"
     },
     "autoload": {
         "psr-0": {
