@@ -1,8 +1,8 @@
 <?php
 
-namespace Bs\Ideal\Exception;
+namespace Bs\IDeal\Exception;
 
-class UnknownResponseException extends IdealException
+class UnknownResponseException extends IDealException
 {
 
 }

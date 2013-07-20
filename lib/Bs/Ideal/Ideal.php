@@ -1,13 +1,13 @@
 <?php
 
-namespace Bs\Ideal;
+namespace Bs\IDeal;
 
-use ass\XmlSecurity\Key;
-use Bs\Ideal\Request;
-use Bs\Ideal\Exception;
+use Bs\IDeal\Exception;
+use Bs\IDeal\Request;
 use DOMDocument;
+use XMLSecurityKey;
 
-class Ideal
+class IDeal
 {
     const VERSION = "3.3.1";
 
@@ -15,7 +15,7 @@ class Ideal
 
     private $subId;
 
-    private $key;
+    private $merchantKey;
 
     private $baseUrl;
 
@@ -24,11 +24,15 @@ class Ideal
         $this->baseUrl = $baseUrl;
     }
 
-    public function setMerchant($merchantId, Key $key, $subId = 0)
+    public function setMerchant($merchantId, $subId = 0)
     {
         $this->merchantId = $merchantId;
         $this->subId = $subId;
-        $this->key = $key;
+    }
+
+    public function setMerchantKey($key, $passphrase, $isFile = true, $type = 'private')
+    {
+
     }
 
     public function getMerchantId()
@@ -41,9 +45,14 @@ class Ideal
         return $this->subId;
     }
 
-    public function getKey()
+    public function getMerchantKey()
     {
-        return $this->key;
+        return $this->merchantKey;
+    }
+
+    public function getMerchantKeyFingerprint()
+    {
+
     }
 
     public function getBaseUrl()
@@ -58,7 +67,7 @@ class Ideal
 
     public function createTransactionRequest()
     {
-
+        // TODO
     }
 
     public function send(Request\Request $request)

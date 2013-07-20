@@ -1,10 +1,10 @@
 <?php
 
-namespace Bs\Ideal\Exception;
+namespace Bs\IDeal\Exception;
 
 use Exception;
 
-class IdealException extends Exception
+class IDealException extends Exception
 {
 
 }

@@ -1,11 +1,11 @@
 <?php
 
-namespace Bs\Ideal\Exception\Response;
+namespace Bs\IDeal\Exception\Response;
 
-use Bs\Ideal\Exception\IdealException;
+use Bs\Ideal\Exception\IDealException;
 use DOMDocument;
 
-class ResponseException extends IdealException
+class ResponseException extends IDealException
 {
     protected $doc;
 

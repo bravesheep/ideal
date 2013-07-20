@@ -1,6 +1,6 @@
 <?php
 
-namespace Bs\Ideal\Exception\Response;
+namespace Bs\IDeal\Exception\Response;
 
 class AcquirerException extends ResponseException
 {

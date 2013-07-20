@@ -1,26 +1,24 @@
 <?php
 
-namespace Bs\Ideal\Request;
+namespace Bs\IDeal\Request;
 
-use ass\XmlSecurity\DSig;
-use Bs\Ideal\Ideal;
-use \DOMImplementation;
+use Bs\IDeal\IDeal;
+use DOMImplementation;
+use XMLSecurityDSig;
 
 class Request
 {
     const XMLNS = "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1";
 
-    private $ideal;
+    protected $ideal;
 
-    private $doc;
+    protected $doc;
 
-    private $root;
-
-    private $merchant;
+    protected $root;
 
     private $signed;
 
-    public function __construct(Ideal $ideal, $rootName)
+    public function __construct(IDeal $ideal, $rootName)
     {
         $this->ideal = $ideal;
         $this->signed = false;
@@ -42,32 +40,46 @@ class Request
         $this->doc->formatOutput = true;
 
         $this->root = $this->doc->documentElement;
-
         $this->root->setAttribute('version', Ideal::VERSION);
 
+        // add timestamp request is created
         $now = gmdate('o-m-d\TH:i:s.000\Z');
         $created = $this->doc->createElement('createDateTimestamp', $now);
         $this->root->appendChild($created);
 
-        $this->merchant = $this->doc->createElement('Merchant');
-        $this->root->appendChild($this->merchant);
-
-        $merchantId = $this->doc->createElement('merchantID', $this->getIdeal()->getMerchantId());
-        $this->merchant->appendChild($merchantId);
-
-        $subId = $this->doc->createElement('subID', $this->getIdeal()->getSubId());
-        $this->merchant->appendChild($subId);
+        // add merchant information
+        $merchant = $this->doc->createElement('Merchant');
+        $merchant->appendChild(
+            $this->doc->createElement(
+                'merchantID',
+                sprintf('%09d', $this->ideal->getMerchantId())
+            )
+        );
+        $merchant->appendChild($this->doc->createElement('subID', $this->ideal->getSubId()));
+        $this->root->appendChild($merchant);
     }
 
     public function sign()
     {
-        $key = $this->getIdeal()->getKey();
-        $signature = DSig::createSignature($key, DSig::EXC_C14N, $this->root);
-        DSig::addNodeToSignature($signature, $this->root, DSig::SHA256, DSig::TRANSFORMATION_ENVELOPED_SIGNATURE, array(
-            'overwrite_id' => false,
-        ));
-        DSig::signDocument($signature, $key, DSig::EXC_C14N);
-        $this->root->removeAttribute('Id');
+        $key = $this->ideal->getMerchantKey();
+
+        // sign
+        $dsig = new XMLSecurityDSig();
+        $dsig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
+        $dsig->addReference($this->doc, XMLSecurityDSig::SHA256, [
+            'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
+        ], [
+            'force_uri' => true,
+        ]);
+        $dsig->sign($key);
+        $signature = $dsig->appendSignature($this->root);
+
+        // add key fingerprint
+        $keyInfo = $this->doc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'KeyInfo');
+        $keyName = $this->doc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'KeyName', $this->ideal->getMerchantKeyFingerprint());
+        $keyInfo->appendChild($keyName);
+        $signature->appendChild($keyInfo);
+
         $this->signed = true;
     }
 
@@ -83,7 +95,6 @@ class Request
 
     public function getDocumentString()
     {
-        $str = $this->getDocument()->saveXML();
-        return str_replace(array('<ds:', '</ds:', ' xmlns:ds="'), array('<', '</', ' xmlns="'), $str);
+        return $this->getDocument()->saveXML();
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Bs\Ideal\Exception;
+namespace Bs\IDeal\Exception;
 
-class InvalidXMLException extends IdealException
+class InvalidXMLException extends IDealException
 {
 
 }

@@ -1,14 +1,14 @@
 <?php
 
-namespace Bs\Ideal\Request;
+namespace Bs\IDeal\Request;
 
-use Bs\Ideal\Ideal;
+use Bs\IDeal\IDeal;
 
 class DirectoryRequest extends Request
 {
     const ROOT_NAME = 'DirectoryReq';
 
-    public function __construct(Ideal $ideal)
+    public function __construct(IDeal $ideal)
     {
         parent::__construct($ideal, self::ROOT_NAME);
     }
