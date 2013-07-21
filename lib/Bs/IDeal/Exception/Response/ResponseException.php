@@ -2,20 +2,25 @@
 
 namespace Bs\IDeal\Exception\Response;
 
-use Bs\Ideal\Exception\IDealException;
-use DOMDocument;
+use Bs\IDeal\Exception\IDealException;
+use Bs\IDeal\Response\Response;
 
 class ResponseException extends IDealException
 {
-    protected $doc;
+    protected $response;
 
-    public function __construct(DOMDocument $document)
+    public function __construct(Response $response)
     {
-        $this->doc = $document;
+        $this->response = $response;
     }
 
-    public function getResponseDocument()
+    public function getResponse()
     {
-        return $this->doc;
+        return $this->response;
+    }
+
+    public function verify($throwException = false)
+    {
+        return $this->response->verify($throwException);
     }
 }

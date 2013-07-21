@@ -2,10 +2,13 @@
 
 namespace Bs\IDeal;
 
-use ass\XmlSecurity\Key;
+// use ass\XmlSecurity\Key;
 use Bs\IDeal\Exception;
 use Bs\IDeal\Request;
+use Bs\IDeal\Response;
 use DOMDocument;
+use XMLSecurityDSig;
+use XMLSecurityKey;
 
 class IDeal
 {
@@ -18,6 +21,8 @@ class IDeal
     private $merchantPrivateKey;
 
     private $merchantCertificate;
+
+    private $acquirerCertificate;
 
     private $baseUrl;
 
@@ -36,17 +41,37 @@ class IDeal
 
     public function setMerchantPrivateKey($key, $passphrase = null, $isFile = true)
     {
-        $this->merchantPrivateKey = Key::factory(Key::RSA_SHA256, $key, $isFile, Key::TYPE_PRIVATE, $passphrase);
+        $this->merchantPrivateKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+        $this->merchantPrivateKey->passphrase = $passphrase;
+        $this->merchantPrivateKey->loadKey($key, $isFile);
+
+        // $this->merchantPrivateKey = Key::factory(Key::RSA_SHA256, $key, $isFile, Key::TYPE_PRIVATE, $passphrase);
     }
 
     public function setMerchantCertificate($key, $isFile = true)
     {
-        $this->merchantCertificate = Key::factory(Key::RSA_SHA256, $key, $isFile, Key::TYPE_PUBLIC);
+        $this->merchantCertificate = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'public']);
+        $this->merchantCertificate->loadKey($key, $isFile, true);
+
+        // $this->merchantCertificate = Key::factory(Key::RSA_SHA256, $key, $isFile, Key::TYPE_PUBLIC);
+    }
+
+    public function setAcquirerCertificate($key, $isFile = true)
+    {
+        $this->acquirerCertificate = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, ['type' => 'public']);
+        $this->acquirerCertificate->loadKey($key, $isFile, true);
+
+        // $this->acquirerCertificate = Key::factory(Key::RSA_SHA256, $key, $isFile, Key::TYPE_PUBLIC);
     }
 
     public function disableVerification()
     {
         $this->verification = false;
+    }
+
+    public function verificationDisabled()
+    {
+        return !$this->verification;
     }
 
     public function getMerchantId()
@@ -67,6 +92,11 @@ class IDeal
     public function getMerchantCertificate()
     {
         return $this->merchantCertificate;
+    }
+
+    public function getAcquirerCertificate()
+    {
+        return $this->acquirerCertificate;
     }
 
     public function getBaseUrl()
@@ -112,14 +142,46 @@ class IDeal
         return $this->handleResult($headers, $body);
     }
 
+    public function verify(DOMDocument $document, XMLSecurityKey $cert, $throwException = false)
+    {
+        if (!$this->verification) {
+            return true;
+        } else {
+            $dsig = new XMLSecurityDSig();
+            $signature = $dsig->locateSignature($document);
+            if (!$signature) {
+                if ($throwException) {
+                    throw new Exception\SecurityException('No signature element');
+                }
+                return false;
+            }
+
+            $dsig->canonicalizeSignedInfo();
+            if (!$dsig->validateReference()) {
+                if ($throwException) {
+                    throw new Exception\SecurityException('Reference for signature invalid');
+                }
+                return false;
+            }
+
+            if (!$dsig->verify($cert)) {
+                if ($throwException) {
+                    throw new Exception\SecurityException('Invalid signature');
+                }
+                return false;
+            }
+            return true;
+        }
+    }
+
     protected function handleResult($headers, $document)
     {
-        print $document; exit;
+        print $document;
         $doc = new DOMDocument();
         if ($doc->loadXML($document)) {
             switch ($doc->documentElement->tagName) {
                 case 'AcquirerErrorRes':
-                    throw new Exception\Response\AcquirerException($doc);
+                    throw new Exception\Response\AcquirerException(new Response\Response($this, $doc));
                 default:
                     throw new Exception\UnknownResponseException();
             }
