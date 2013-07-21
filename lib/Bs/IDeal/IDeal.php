@@ -15,9 +15,13 @@ class IDeal
 
     private $subId;
 
-    private $merchantKey;
+    private $merchantPrivateKey;
+
+    private $merchantCertificate;
 
     private $baseUrl;
+
+    private $verification = true;
 
     public function __construct($baseUrl)
     {
@@ -30,9 +34,19 @@ class IDeal
         $this->subId = $subId;
     }
 
-    public function setMerchantKey($key, $passphrase = null, $isFile = true)
+    public function setMerchantPrivateKey($key, $passphrase = null, $isFile = true)
     {
-        $this->merchantKey = Key::factory(Key::RSA_SHA256, $key, $isFile, Key::TYPE_PRIVATE, $passphrase);
+        $this->merchantPrivateKey = Key::factory(Key::RSA_SHA256, $key, $isFile, Key::TYPE_PRIVATE, $passphrase);
+    }
+
+    public function setMerchantCertificate($key, $isFile = true)
+    {
+        $this->merchantCertificate = Key::factory(Key::RSA_SHA256, $key, $isFile, Key::TYPE_PUBLIC);
+    }
+
+    public function disableVerification()
+    {
+        $this->verification = false;
     }
 
     public function getMerchantId()
@@ -45,9 +59,14 @@ class IDeal
         return $this->subId;
     }
 
-    public function getMerchantKey()
+    public function getMerchantPrivateKey()
     {
-        return $this->merchantKey;
+        return $this->merchantPrivateKey;
+    }
+
+    public function getMerchantCertificate()
+    {
+        return $this->merchantCertificate;
     }
 
     public function getBaseUrl()
@@ -73,17 +92,27 @@ class IDeal
 
         $curl = curl_init($this->getBaseUrl());
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $request->getDocumentString());
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
             'Content-Type' => 'text/xml; charset=UTF-8'
         ));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        print $request->getDocumentString();
-        $result = curl_exec($curl);
-        return $this->handleResult($result);
+        if ($this->verification === false) {
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        }
+
+        // print $request->getDocumentString(); exit;
+
+        $response = curl_exec($curl);
+        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $headers = explode("\r\n", substr($response, 0, $header_size));
+        $body = substr($response, $header_size);
+
+        return $this->handleResult($headers, $body);
     }
 
-    protected function handleResult($document)
+    protected function handleResult($headers, $document)
     {
         print $document; exit;
         $doc = new DOMDocument();

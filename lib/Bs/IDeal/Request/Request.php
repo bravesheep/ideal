@@ -61,16 +61,22 @@ class Request
 
     public function sign()
     {
-        $key = $this->ideal->getMerchantKey();
+        $key = $this->ideal->getMerchantPrivateKey();
+
+        // generate KeyInfo node
+        $thumbprint = $this->ideal->getMerchantCertificate()->getX509Thumbprint();
+        $keyName = $this->doc->createElementNS(DSig::NS_XMLDSIG, 'KeyName', $thumbprint);
+        $keyInfo = $this->doc->createElementNS(DSig::NS_XMLDSIG, 'KeyInfo');
+        $keyInfo->appendChild($keyName);
 
         // sign
-        $signature = DSig::createSignature($key, DSig::EXC_C14N, $this->doc);
-        DSig::addNodeToSignature($signature, $this->doc, DSig::SHA256, DSig::TRANSFORMATION_ENVELOPED_SIGNATURE, array(
-            'overwrite_id' => false,
-        ));
+        $signature = DSig::createSignature($key, DSig::EXC_C14N, $this->root, null, $keyInfo);
+        DSig::addNodeToSignature($signature, $this->doc, DSig::SHA256, DSig::TRANSFORMATION_ENVELOPED_SIGNATURE, [
+            'force_uri' => true,
+        ]);
         DSig::signDocument($signature, $key, DSig::EXC_C14N);
-
         $this->signed = true;
+        print $this->getDocumentString();
     }
 
     public function isSigned()
