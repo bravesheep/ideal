@@ -115,4 +115,9 @@ class Request
     {
         return $this->getDocument()->saveXML(null, LIBXML_NOEMPTYTAG);
     }
+
+    public function send()
+    {
+        return $this->ideal->send($this);
+    }
 }

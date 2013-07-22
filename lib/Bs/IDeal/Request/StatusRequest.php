@@ -26,4 +26,9 @@ class StatusRequest extends Request
         $transaction->appendChild($this->createElement('transactionID', $this->transactionId));
         $this->root->appendChild($transaction);
     }
+
+    public function getTransactionId()
+    {
+        return $this->transactionId;
+    }
 }

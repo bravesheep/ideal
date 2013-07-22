@@ -13,6 +13,12 @@ class IDeal
 {
     const VERSION = "3.3.1";
 
+    const EURO = 'EUR';
+
+    const DUTCH = 'nl';
+
+    const ENGLISH = 'en';
+
     private $merchantId;
 
     private $subId;
