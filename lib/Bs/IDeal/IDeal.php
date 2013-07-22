@@ -26,11 +26,15 @@ class IDeal
 
     private $baseUrl;
 
-    private $verification = true;
+    private $verification;
+
+    private $autoVerify;
 
     public function __construct($baseUrl)
     {
         $this->baseUrl = $baseUrl;
+        $this->autoVerify = true;
+        $this->verification = true;
     }
 
     public function setMerchant($merchantId, $subId = 0)
@@ -69,9 +73,19 @@ class IDeal
         $this->verification = false;
     }
 
+    public function disableAutoVerify()
+    {
+        $this->autoVerify = false;
+    }
+
     public function verificationDisabled()
     {
         return !$this->verification;
+    }
+
+    public function doesAutoVerify()
+    {
+        return $this->autoVerify;
     }
 
     public function getMerchantId()
@@ -133,6 +147,30 @@ class IDeal
         }
 
         // print $request->getDocumentString(); exit;
+        return $this->handleResult('', '<?xml version="1.0" encoding="UTF-8"?><DirectoryRes xmlns="http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#" version="3.3.1">
+    <createDateTimestamp>2013-07-22T18:26:11.249Z</createDateTimestamp>
+    <Acquirer>
+        <acquirerID>0020</acquirerID>
+    </Acquirer>
+    <Directory>
+        <directoryDateTimestamp>2013-07-22T18:26:11.249Z</directoryDateTimestamp>
+        <Country>
+            <countryNames>Deutschland</countryNames>
+            <Issuer>
+                <issuerID>INGBNL2A</issuerID>
+                <issuerName>Issuer Simulation V3 - ING</issuerName>
+            </Issuer>
+            <Issuer>
+                <issuerID>RABONL2U</issuerID>
+                <issuerName>Issuer Simulation V3 - RABO</issuerName>
+            </Issuer>
+        </Country>
+    </Directory>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>1VNbupLugve7a2/ln8VVbyVOAGCA3PA8yfKctaSH4/k=</DigestValue></Reference></SignedInfo><SignatureValue>YjwONW7pVo0vAY41Nl3q8CG/chiIpiug4mY1mC+cv4Mga43Q0dsM23A9OSTkRxHSdgNcq2XoAnyq
+tWYCLWl9Z60/Cjz9GWRyc2TetHlgIBhb0RakPCzFb3UjnmXZsLUwCNdoq/ydiEDJEVdM2e90StWS
+eM5D+t9aIfd65X54MejlEpWu96oea3kSvvFJrKpcfLeoLYF/stKMfqlsxrGRgAWkV+4k/NT3rkBD
+wkRhUUt/Z67gPd+eAd669BIAsRBjFBNZYyn6yIccwLXhvK3/qSUgbhMWkccdVZBBTQAFZIH/Ff9t
+sPAshOx1sbehdBkjD3QXwT4+qjUZ7qrbS1fvOw==</SignatureValue><KeyInfo><KeyName>FC0A17A7ABD72369726EA4D4DBEF9838128A7C78</KeyName></KeyInfo></Signature></DirectoryRes>');
 
         $response = curl_exec($curl);
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
@@ -178,12 +216,26 @@ class IDeal
     {
         $doc = new DOMDocument();
         if ($doc->loadXML($document)) {
+            $response = null;
             switch ($doc->documentElement->tagName) {
                 case 'AcquirerErrorRes':
-                    throw new Exception\Response\AcquirerException(new Response\Response($this, $doc));
+                    $response = new Response\ErrorResponse($this, $doc);
+                    break;
+                case 'DirectoryRes':
+                    $response = new Response\DirectoryResponse($this, $doc);
+                    break;
                 default:
                     throw new Exception\UnknownResponseException();
             }
+
+            if ($this->doesAutoVerify()) {
+                $response->verify(true);
+            }
+
+            if ($response instanceof Response\ErrorResponse) {
+                throw new Exception\ResponseException($response);
+            }
+            return $response;
         } else {
             // TODO: add parsing error info
             throw new Exception\InvalidXMLException();
