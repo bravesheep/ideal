@@ -31,12 +31,12 @@ class StatusResponse extends Response
         return $this->singleValue('//i:Transaction/i:consumerName');
     }
 
-    public function getConsumerIban()
+    public function getConsumerIBAN()
     {
         return $this->singleValue('//i:Transaction/i:consumerIBAN');
     }
 
-    public function getConsumerBic()
+    public function getConsumerBIC()
     {
         return $this->singleValue('//i:Transaction/i:consumerBIC');
     }
