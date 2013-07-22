@@ -19,6 +19,16 @@ class IDeal
 
     const ENGLISH = 'en';
 
+    const SUCCESS = 'Success';
+
+    const CANCELLED = 'Cancelled';
+
+    const EXPIRED = 'Expired';
+
+    const FAILURE = 'Failure';
+
+    const OPEN = 'Open';
+
     private $merchantId;
 
     private $subId;
