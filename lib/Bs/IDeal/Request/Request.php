@@ -41,10 +41,10 @@ class Request
         $this->doc->formatOutput = true;
 
         $this->root = $this->doc->documentElement;
-        $this->root->setAttribute('version', Ideal::VERSION);
+        $this->root->setAttribute('version', IDeal::VERSION);
 
         // add timestamp request is created
-        $now = gmdate('Y-m-d\TH:i:s.000\Z');
+        $now = gmdate('Y-m-d\TH:i:s.0\Z');
         $created = $this->doc->createElement('createDateTimestamp', $now);
         $this->root->appendChild($created);
 

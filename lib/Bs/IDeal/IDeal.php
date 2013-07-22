@@ -176,7 +176,6 @@ class IDeal
 
     protected function handleResult($headers, $document)
     {
-        print $document;
         $doc = new DOMDocument();
         if ($doc->loadXML($document)) {
             switch ($doc->documentElement->tagName) {
