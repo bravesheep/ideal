@@ -2,6 +2,7 @@
 
 namespace Bs\IDeal\Response;
 
+use Bs\IDeal\Request;
 use Bs\IDeal\Exception;
 use Bs\IDeal\IDeal;
 use DOMDocument;
@@ -24,7 +25,9 @@ class Response
 
     private $verificationCompleted;
 
-    public function __construct(IDeal $ideal, DOMDocument $document)
+    protected $request;
+
+    public function __construct(IDeal $ideal, Request\Request $request, DOMDocument $document)
     {
         $this->doc = $document;
         $this->root = $this->doc->documentElement;
@@ -33,6 +36,11 @@ class Response
         $rootNamespace = $this->doc->lookupNamespaceUri($this->doc->namespaceURI);
         $this->xpath->registerNamespace('i', $rootNamespace);
         $this->verificationCompleted = false;
+    }
+
+    public function getRequest()
+    {
+        $this->request;
     }
 
     public function getDocument()

@@ -19,6 +19,8 @@ class Request
 
     private $signed;
 
+    protected $merchant;
+
     public function __construct(IDeal $ideal, $rootName)
     {
         $this->ideal = $ideal;
@@ -46,25 +48,35 @@ class Request
         $this->root->setAttribute('version', IDeal::VERSION);
 
         // add timestamp request is created
-        $now = gmdate('Y-m-d\TH:i:s.0\Z');
-        // $now = '2013-07-22T13:00:10.000Z';
-        $created = $this->doc->createElement('createDateTimestamp', $now);
+        $now = gmdate('Y-m-d\TH:i:s.000\Z');
+        $created = $this->createElement('createDateTimestamp', $now);
         $this->root->appendChild($created);
 
         // add merchant information
-        $merchant = $this->doc->createElement('Merchant');
-        $merchant->appendChild(
-            $this->doc->createElement(
+        $this->merchant = $this->createElement('Merchant');
+        $this->merchant->appendChild(
+            $this->createElement(
                 'merchantID',
                 sprintf('%09d', $this->ideal->getMerchantId())
             )
         );
-        $merchant->appendChild($this->doc->createElement('subID', $this->ideal->getSubId()));
-        $this->root->appendChild($merchant);
+        $this->merchant->appendChild($this->createElement('subID', $this->ideal->getSubId()));
+        $this->root->appendChild($this->merchant);
+    }
+
+    protected function createElement($name, $value = null)
+    {
+        if ($value === null) {
+            $element = $this->doc->createElementNS(self::XMLNS, $name);
+        } else {
+            $element = $this->doc->createElementNS(self::XMLNS, $name, $value);
+        }
+        return $element;
     }
 
     public function sign()
     {
+        $this->preSign();
         $key = $this->ideal->getMerchantPrivateKey();
 
         // sign document
@@ -81,20 +93,12 @@ class Request
         $keyInfo->appendChild($keyName);
         $signature->appendChild($keyInfo);
 
-        // generate KeyInfo node
-        // $thumbprint = $this->ideal->getMerchantCertificate()->getX509Thumbprint();
-        // $keyName = $this->doc->createElementNS(DSig::NS_XMLDSIG, 'KeyName', $thumbprint);
-        // $keyInfo = $this->doc->createElementNS(DSig::NS_XMLDSIG, 'KeyInfo');
-        // $keyInfo->appendChild($keyName);
-
-        // sign
-        // $signature = DSig::createSignature($key, DSig::EXC_C14N, $this->root, null, $keyInfo);
-        // DSig::addNodeToSignature($signature, $this->doc, DSig::SHA256, DSig::TRANSFORMATION_ENVELOPED_SIGNATURE, [
-        //     'force_uri' => true,
-        // ]);
-        // DSig::signDocument($signature, $key, DSig::EXC_C14N);
-        // print $this->getDocumentString(); exit;
         $this->signed = true;
+    }
+
+    protected function preSign()
+    {
+        // do nothing in standard implementation
     }
 
     public function isSigned()
@@ -110,6 +114,5 @@ class Request
     public function getDocumentString()
     {
         return $this->getDocument()->saveXML(null, LIBXML_NOEMPTYTAG);
-        //return preg_replace('/\n\s*/', '', $xml);
     }
 }
