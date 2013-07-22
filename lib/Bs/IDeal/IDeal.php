@@ -128,9 +128,11 @@ class IDeal
         return $request;
     }
 
-    public function createStatusRequest()
+    public function createStatusRequest($transactionId)
     {
-
+        $request = new Request\StatusRequest($this);
+        $request->setTransactionId($transactionId);
+        return $request;
     }
 
     public function send(Request\Request $request)
@@ -170,6 +172,12 @@ class IDeal
                     break;
                 case 'DirectoryRes':
                     $response = new Response\DirectoryResponse($this, $request, $doc);
+                    break;
+                case 'AcquirerTrxRes':
+                    $response = new Response\TransactionResponse($this, $request, $doc);
+                    break;
+                case 'AcquirerStatusRes':
+                    $response = new Response\StatusResponse($this, $request, $doc);
                     break;
                 default:
                     throw new Exception\UnknownResponseException();
