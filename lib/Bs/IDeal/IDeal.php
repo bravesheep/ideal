@@ -45,11 +45,14 @@ class IDeal
 
     private $autoVerify;
 
+    private $failOnStatus;
+
     public function __construct($baseUrl)
     {
         $this->baseUrl = $baseUrl;
         $this->autoVerify = true;
         $this->verification = true;
+        $this->failOnStatus = false;
     }
 
     public function setMerchant($merchantId, $subId = 0)
@@ -95,6 +98,11 @@ class IDeal
     public function doesAutoVerify()
     {
         return $this->autoVerify;
+    }
+
+    public function failOnStatusNotSuccess($fail = true)
+    {
+        $this->failOnStatus = $fail;
     }
 
     public function getMerchantId()
@@ -205,6 +213,12 @@ class IDeal
 
             if ($response instanceof Response\ErrorResponse) {
                 throw new Exception\ResponseException($response);
+            }
+
+            if ($this->failOnStatus && $response instanceof Response\StatusResponse) {
+                if ($response->getStatus() !== self::SUCCESS) {
+                    throw new Exception\NoSuccessException($response);
+                }
             }
             return $response;
         } else {
