@@ -39,12 +39,15 @@ class Request
         $this->doc->version = '1.0';
         $this->doc->encoding = 'UTF-8';
         $this->doc->formatOutput = true;
+        $this->doc->preserveWhiteSpace = false;
+        $this->doc->formatOutput = false;
 
         $this->root = $this->doc->documentElement;
         $this->root->setAttribute('version', IDeal::VERSION);
 
         // add timestamp request is created
         $now = gmdate('Y-m-d\TH:i:s.0\Z');
+        // $now = '2013-07-22T13:00:10.000Z';
         $created = $this->doc->createElement('createDateTimestamp', $now);
         $this->root->appendChild($created);
 
@@ -68,13 +71,13 @@ class Request
         $dsig = new XMLSecurityDSig();
         $dsig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
         $dsig->addReference($this->doc, XMLSecurityDSig::SHA256, ['http://www.w3.org/2000/09/xmldsig#enveloped-signature'], ['force_uri' => true]);
-        $dsig->sign($key);
-        $signature = $dsig->appendSignature($this->root);
+        $dsig->sign($key, $this->root);
+        $signature = $dsig->sigNode;
 
         // add keyinfo
         $thumbprint = $this->ideal->getMerchantCertificate()->getX509Thumbprint();
-        $keyName = $this->doc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'KeyName', $thumbprint);
-        $keyInfo = $this->doc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'KeyInfo');
+        $keyName = $dsig->createNewSignNode('KeyName', strtoupper($thumbprint));
+        $keyInfo = $dsig->createNewSignNode('KeyInfo');
         $keyInfo->appendChild($keyName);
         $signature->appendChild($keyInfo);
 
@@ -90,9 +93,8 @@ class Request
         //     'force_uri' => true,
         // ]);
         // DSig::signDocument($signature, $key, DSig::EXC_C14N);
-
+        // print $this->getDocumentString(); exit;
         $this->signed = true;
-        print $this->getDocumentString();
     }
 
     public function isSigned()
@@ -107,6 +109,7 @@ class Request
 
     public function getDocumentString()
     {
-        return $this->getDocument()->saveXML();
+        return $this->getDocument()->saveXML(null, LIBXML_NOEMPTYTAG);
+        //return preg_replace('/\n\s*/', '', $xml);
     }
 }
