@@ -57,7 +57,7 @@ class StatusResponse extends Response
         }
     }
 
-    public function getConsumerName()
+    public function getCurrency()
     {
         return $this->singleValue('//i:Transaction/i:currency');
     }
