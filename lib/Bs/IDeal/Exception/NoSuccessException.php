@@ -2,6 +2,8 @@
 
 namespace Bs\IDeal\Exception;
 
+use Bs\IDeal\Response\Response;
+
 class NoSuccessException extends IDealException
 {
     protected $response;

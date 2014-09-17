@@ -51,7 +51,7 @@ class StatusResponse extends Response
         $val = $this->getInternalAmount();
         $parts = explode('.', $val);
         if (count($parts) < 2) {
-            return inval($parts[0]) * 100;
+            return intval($parts[0]) * 100;
         } else {
             return intval($parts[0]) * 100 + intval($parts[1]);
         }
