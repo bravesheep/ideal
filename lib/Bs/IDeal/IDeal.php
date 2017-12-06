@@ -188,7 +188,7 @@ class IDeal
     protected function handleResult(Request\Request $request, $headers, $document)
     {
         $doc = new DOMDocument();
-        if ($doc->loadXML($document)) {
+        if (!empty($document) && $doc->loadXML($document)) {
             $response = null;
             switch ($doc->documentElement->tagName) {
                 case 'AcquirerErrorRes':
